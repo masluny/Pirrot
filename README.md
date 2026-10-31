@@ -2,7 +2,7 @@
 
 A pirate's kit for the [pi coding agent](https://github.com/earendil-works/pi): a pixel scarlet macaw that walks its branch while the model works, plus **multikey**, a local NVIDIA API key rotator that keeps pi sailing when one key hits its rate limit.
 
-![the macaw perched over pi's input box](docs/parrot.png)
+![pi in Ghostty with the macaw perched next to the input box](docs/screenshot.jpg)
 
 ## What's aboard
 
