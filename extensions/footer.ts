@@ -1,0 +1,142 @@
+/**
+ * footer.ts — a minimal footer that renders the thinking level in its own
+ * bright, per-level shade instead of pi's flat "dim" gray.
+ *
+ * Pi's default footer paints the whole right cluster (model + thinking level)
+ * with theme.fg("dim", ...), so the thinking level never gets its own color.
+ * This footer mirrors the native two-line layout (cwd/branch · tokens · cost ·
+ * context%) but colors the thinking level with the theme's thinking<Level>
+ * token — so it escalates off → xhigh and pops on the current theme.
+ *
+ * Not a theme, not a switcher, no commands, no polling. Just footer layout.
+ * Auto-discovered from ~/.pi/agent/extensions/. Hot-reload with /reload.
+ */
+
+import type {
+	ExtensionAPI,
+	ExtensionContext,
+	ReadonlyFooterDataProvider,
+	Theme,
+	ThemeColor,
+} from "@earendil-works/pi-coding-agent";
+import type { Component, TUI } from "@earendil-works/pi-tui";
+import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
+import type { AssistantMessage } from "@earendil-works/pi-ai";
+
+// thinking level → the theme token that colors it (dim → vivid)
+const THINK_TOKEN: Record<string, ThemeColor> = {
+	off: "thinkingOff",
+	minimal: "thinkingMinimal",
+	low: "thinkingLow",
+	medium: "thinkingMedium",
+	high: "thinkingHigh",
+	xhigh: "thinkingXhigh",
+};
+
+function fmtTokens(n: number): string {
+	if (n < 1000) return `${n}`;
+	if (n < 10000) return `${(n / 1000).toFixed(1)}k`;
+	if (n < 1000000) return `${Math.round(n / 1000)}k`;
+	return `${(n / 1000000).toFixed(1)}M`;
+}
+
+function homeRelative(cwd: string): string {
+	const home = process.env.HOME || process.env.USERPROFILE || "";
+	if (home && (cwd === home || cwd.startsWith(home + "/"))) {
+		return "~" + cwd.slice(home.length);
+	}
+	return cwd;
+}
+
+export default function (pi: ExtensionAPI): void {
+	let thinkingLevel = "off";
+
+	function totals(ctx: ExtensionContext): { input: number; output: number; cost: number } {
+		let input = 0;
+		let output = 0;
+		let cost = 0;
+		for (const e of ctx.sessionManager.getBranch()) {
+			if (e.type === "message" && e.message.role === "assistant") {
+				const m = e.message as AssistantMessage;
+				input += m.usage.input;
+				output += m.usage.output;
+				cost += m.usage.cost.total;
+			}
+		}
+		return { input, output, cost };
+	}
+
+	function thinkChip(theme: Theme): string {
+		const level = thinkingLevel || "off";
+		const tok = THINK_TOKEN[level] ?? "thinkingMedium";
+		const label = level === "off" ? "off" : level;
+		// ◆ glyph + label, both in the bright thinking shade
+		return `${theme.fg(tok, "◆")} ${theme.bold(theme.fg(tok, label))}`;
+	}
+
+	function buildFooter(ctx: ExtensionContext, footerData: ReadonlyFooterDataProvider): Component {
+		let unsub: (() => void) | undefined;
+		let branch: string | null = footerData.getGitBranch();
+		unsub = footerData.onBranchChange(() => {
+			branch = footerData.getGitBranch();
+		});
+		return {
+			invalidate() {},
+			dispose() {
+				unsub?.();
+				unsub = undefined;
+			},
+			render(width: number): string[] {
+				const theme = ctx.ui.theme;
+
+				// ---- line 1: cwd (· branch) ----
+				let pwd = homeRelative(ctx.sessionManager.getCwd?.() ?? process.cwd());
+				if (branch) pwd = `${pwd} ${theme.fg("dim", `(${branch})`)}`;
+				const line1 = truncateToWidth(theme.fg("dim", pwd), width, theme.fg("dim", "…"));
+
+				// ---- line 2 (below the input bar): model • ◆ thinking  ↑in ↓out ctx% ----
+				const modelId = ctx.model?.id ?? "no-model";
+				const model = theme.fg("mdLink", modelId);
+				const chip = thinkChip(theme);
+				let left = `${model} ${theme.fg("dim", "•")} ${chip}`;
+				if (ctx.model?.provider && footerData.getAvailableProviderCount() > 1) {
+					left = `${theme.fg("dim", `(${ctx.model.provider})`)} ${left}`;
+				}
+
+				// token / context stats — moved here (below the input) from beside the pet
+				const t = totals(ctx);
+				const stats: string[] = [];
+				if (t.input) stats.push(theme.fg("success", `↑${fmtTokens(t.input)}`));
+				if (t.output) stats.push(theme.fg("warning", `↓${fmtTokens(t.output)}`));
+				const u = ctx.getContextUsage?.();
+				if (u && u.percent != null && u.contextWindow != null) {
+					const pct = Math.round(u.percent);
+					const color: ThemeColor = pct > 90 ? "error" : pct > 70 ? "warning" : "muted";
+					stats.push(theme.fg(color, `${pct}%/${fmtTokens(u.contextWindow)}`));
+				}
+				if (t.cost) stats.push(theme.fg("dim", `$${t.cost.toFixed(3)}`));
+				const tokens = stats.join(theme.fg("dim", " · "));
+
+				const line2 = tokens ? `${left}${theme.fg("dim", "   ·   ")}${tokens}` : left;
+				return [line1, truncateToWidth(line2, width)];
+			},
+		};
+	}
+
+	pi.on("session_start", async (_event, ctx) => {
+		if (ctx.mode !== "tui") return;
+		thinkingLevel = pi.getThinkingLevel();
+		ctx.ui.setFooter((_tui: TUI, _theme: Theme, footerData: ReadonlyFooterDataProvider) =>
+			buildFooter(ctx, footerData),
+		);
+	});
+
+	pi.on("thinking_level_select", async (event, ctx) => {
+		thinkingLevel = event.level;
+		if (ctx.mode === "tui") ctx.ui.invalidate?.();
+	});
+
+	pi.on("session_shutdown", async (_event, ctx) => {
+		void ctx;
+	});
+}

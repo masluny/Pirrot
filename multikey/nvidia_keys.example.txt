@@ -1,0 +1,6 @@
+# One NVIDIA API key per line (get them at https://build.nvidia.com).
+# Optional `budget=N` sets the credit budget shown in the status views (default 1000).
+# Lines starting with # are ignored.
+#
+# nvapi-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# nvapi-yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy budget=5000

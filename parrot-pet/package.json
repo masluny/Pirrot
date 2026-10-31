@@ -1,0 +1,12 @@
+{
+  "name": "parrot-pet-dev",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "preview": "node src/preview.ts",
+    "preview:final": "node src/preview-final.ts",
+    "preview:walk": "node src/preview-walk.ts",
+    "preview:zoom": "node src/preview-zoom.ts",
+    "widget": "node src/emit-widget2.ts"
+  }
+}

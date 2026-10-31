@@ -1,0 +1,51 @@
+<style>
+  .pw{font-family:-apple-system,system-ui,sans-serif;color:#cbd5e1}
+  .pw .bar{display:flex;gap:8px;margin:0 0 12px;flex-wrap:wrap}
+  .pw .bar button{font:500 13px system-ui;color:#cbd5e1;background:#1b1f2a;border:1px solid #313a4d;border-radius:999px;padding:6px 14px;cursor:pointer}
+  .pw .bar button.on{background:#2b3550;border-color:#6b8ccc;color:#fff}
+  .pw .screen{background:#0d0f14;border:1px solid #232a38;border-radius:12px;padding:20px}
+  .pw canvas{display:block;image-rendering:pixelable;image-rendering:pixelated}
+  .pw .cap{font-size:12px;color:#64748b;margin-top:10px}
+</style>
+<div class="pw">
+  <h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden">Animated pixel-art parrot pet perched on a branch above the pi input box.</h2>
+  <div class="bar" id="bar"></div>
+  <div class="screen"><canvas id="cv" width="640" height="360"></canvas></div>
+  <div class="cap" id="cap"></div>
+</div>
+<script>
+(function(){
+  var THEMES=[{"name":"scarlet","blurb":"scarlet macaw — yellow-and-blue wing","pal":{"R":"rgb(220,54,60)","r":"rgb(156,30,42)","W":"rgb(248,246,240)","w":"rgb(206,198,188)","K":"rgb(24,20,28)","y":"rgb(246,202,54)","B":"rgb(64,120,214)","b":"rgb(40,82,158)","f":"rgb(150,150,156)","N":"rgb(158,114,70)","m":"rgb(124,86,52)","n":"rgb(80,54,32)","G":"rgb(96,168,78)","g":"rgb(52,112,54)","L":"rgb(150,205,110)","O":"rgb(234,226,202)","o":"rgb(52,48,52)"},"frames":{"idle":[".................RR...................","...............RRRR...................","..............RRWWROOO................","..............RRWKROOOO...............","..............RRRRoOOO................","..............RRRRooO.................","...............RyyRR..................","..............RyyyRR..................","..............RBBRR...................",".....LG.......RBRR....................",".....GGg.......RRr.......LG...........","......gg......fRrr.......GGg......LG..",".........NNNNmNNNNmNNNNN..gg...L..GGg.",".......NNnnnnnnnnnnnnnnnmNmnN.Gg...gg.","....NNNnnnn....r........nnNnnNmNNNNNm.","..NNnnnnn...................gnnnnnnn.."],"blink":[".................RR...................","...............RRRR...................","..............RRWRROOO................","..............RRWKKOOOO...............","..............RRRRoOOO................","..............RRRRooO.................","...............RyyRR..................","..............RyyyRR..................","..............RBBRR...................",".....LG.......RBRR....................",".....GGg.......RRr.......LG...........","......gg......fRrr.......GGg......LG..",".........NNNNmNNNNmNNNNN..gg...L..GGg.",".......NNnnnnnnnnnnnnnnnmNmnN.Gg...gg.","....NNNnnnn....r........nnNnnNmNNNNNm.","..NNnnnnn...................gnnnnnnn.."]}},{"name":"hyacinth","blurb":"hyacinth macaw — cobalt + gold","pal":{"R":"rgb(54,92,220)","r":"rgb(32,54,148)","W":"rgb(246,206,92)","w":"rgb(200,166,74)","K":"rgb(18,16,28)","y":"rgb(244,206,88)","B":"rgb(120,176,250)","b":"rgb(70,118,210)","f":"rgb(150,150,156)","N":"rgb(158,114,70)","m":"rgb(124,86,52)","n":"rgb(80,54,32)","G":"rgb(96,168,78)","g":"rgb(52,112,54)","L":"rgb(150,205,110)","O":"rgb(234,226,202)","o":"rgb(52,48,52)"},"frames":{"idle":[".................RR...................","...............RRRR...................","..............RRWWROOO................","..............RRWKROOOO...............","..............RRRRoOOO................","..............RRRRooO.................","...............RyyRR..................","..............RyyyRR..................","..............RBBRR...................",".....LG.......RBRR....................",".....GGg.......RRr.......LG...........","......gg......fRrr.......GGg......LG..",".........NNNNmNNNNmNNNNN..gg...L..GGg.",".......NNnnnnnnnnnnnnnnnmNmnN.Gg...gg.","....NNNnnnn....r........nnNnnNmNNNNNm.","..NNnnnnn...................gnnnnnnn.."],"blink":[".................RR...................","...............RRRR...................","..............RRWRROOO................","..............RRWKKOOOO...............","..............RRRRoOOO................","..............RRRRooO.................","...............RyyRR..................","..............RyyyRR..................","..............RBBRR...................",".....LG.......RBRR....................",".....GGg.......RRr.......LG...........","......gg......fRrr.......GGg......LG..",".........NNNNmNNNNmNNNNN..gg...L..GGg.",".......NNnnnnnnnnnnnnnnnmNmnN.Gg...gg.","....NNNnnnn....r........nnNnnNmNNNNNm.","..NNnnnnn...................gnnnnnnn.."]}},{"name":"galah","blurb":"galah — rose-pink + grey","pal":{"R":"rgb(238,112,148)","r":"rgb(176,62,98)","W":"rgb(250,232,236)","w":"rgb(214,188,196)","K":"rgb(28,22,32)","y":"rgb(236,226,198)","B":"rgb(150,156,168)","b":"rgb(110,118,132)","f":"rgb(176,150,150)","N":"rgb(158,114,70)","m":"rgb(124,86,52)","n":"rgb(80,54,32)","G":"rgb(96,168,78)","g":"rgb(52,112,54)","L":"rgb(150,205,110)","O":"rgb(234,226,202)","o":"rgb(52,48,52)"},"frames":{"idle":[".................RR...................","...............RRRR...................","..............RRWWROOO................","..............RRWKROOOO...............","..............RRRRoOOO................","..............RRRRooO.................","...............RyyRR..................","..............RyyyRR..................","..............RBBRR...................",".....LG.......RBRR....................",".....GGg.......RRr.......LG...........","......gg......fRrr.......GGg......LG..",".........NNNNmNNNNmNNNNN..gg...L..GGg.",".......NNnnnnnnnnnnnnnnnmNmnN.Gg...gg.","....NNNnnnn....r........nnNnnNmNNNNNm.","..NNnnnnn...................gnnnnnnn.."],"blink":[".................RR...................","...............RRRR...................","..............RRWRROOO................","..............RRWKKOOOO...............","..............RRRRoOOO................","..............RRRRooO.................","...............RyyRR..................","..............RyyyRR..................","..............RBBRR...................",".....LG.......RBRR....................",".....GGg.......RRr.......LG...........","......gg......fRrr.......GGg......LG..",".........NNNNmNNNNmNNNNN..gg...L..GGg.",".......NNnnnnnnnnnnnnnnnmNmnN.Gg...gg.","....NNNnnnn....r........nnNnnNmNNNNNm.","..NNnnnnn...................gnnnnnnn.."]}},{"name":"synthwave","blurb":"synthwave — magenta + cyan","pal":{"R":"rgb(236,66,162)","r":"rgb(160,32,120)","W":"rgb(242,232,252)","w":"rgb(200,186,228)","K":"rgb(18,10,32)","y":"rgb(240,210,120)","B":"rgb(120,120,250)","b":"rgb(96,56,198)","f":"rgb(150,150,170)","N":"rgb(158,114,70)","m":"rgb(124,86,52)","n":"rgb(80,54,32)","G":"rgb(96,168,78)","g":"rgb(52,112,54)","L":"rgb(150,205,110)","O":"rgb(234,226,202)","o":"rgb(52,48,52)"},"frames":{"idle":[".................RR...................","...............RRRR...................","..............RRWWROOO................","..............RRWKROOOO...............","..............RRRRoOOO................","..............RRRRooO.................","...............RyyRR..................","..............RyyyRR..................","..............RBBRR...................",".....LG.......RBRR....................",".....GGg.......RRr.......LG...........","......gg......fRrr.......GGg......LG..",".........NNNNmNNNNmNNNNN..gg...L..GGg.",".......NNnnnnnnnnnnnnnnnmNmnN.Gg...gg.","....NNNnnnn....r........nnNnnNmNNNNNm.","..NNnnnnn...................gnnnnnnn.."],"blink":[".................RR...................","...............RRRR...................","..............RRWRROOO................","..............RRWKKOOOO...............","..............RRRRoOOO................","..............RRRRooO.................","...............RyyRR..................","..............RyyyRR..................","..............RBBRR...................",".....LG.......RBRR....................",".....GGg.......RRr.......LG...........","......gg......fRrr.......GGg......LG..",".........NNNNmNNNNmNNNNN..gg...L..GGg.",".......NNnnnnnnnnnnnnnnnmNmnN.Gg...gg.","....NNNnnnn....r........nnNnnNmNNNNNm.","..NNnnnnn...................gnnnnnnn.."]}}];
+  var PX=8;               // device px per source pixel (square)
+  var GAP_ROWS=2;         // gap between branch and the mock input box
+  var cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+  var bar=document.getElementById('bar'), cap=document.getElementById('cap');
+  var cur=0, queue=[];
+
+  function grid(f){return f.map(function(r){return r.split('');});}
+  function drawFrame(theme, name){
+    var t=THEMES[theme], f=t.frames[name]||t.frames.idle, g=grid(f);
+    var W=0; g.forEach(function(r){if(r.length>W)W=r.length;});
+    var H=g.length;
+    var boxRows=3, boxTop=H+GAP_ROWS;
+    var totalRows=(H+GAP_ROWS+boxRows);
+    cv.width=W*PX; cv.height=totalRows*PX;
+    ctx.clearRect(0,0,cv.width,cv.height);
+    // pixels
+    for(var y=0;y<H;y++){var row=g[y];for(var x=0;x<row.length;x++){var ch=row[x];var col=t.pal[ch];if(!col)continue;ctx.fillStyle=col;ctx.fillRect(x*PX,y*PX,PX,PX);}}
+    // mock input box (rounded), drawn with strokes to look like pi
+    var bx=0.5*PX, by=boxTop*PX, bw=(W-1)*PX, bh=boxRows*PX;
+    ctx.strokeStyle='#4a5568'; ctx.lineWidth=Math.max(1,PX*0.18);
+    roundRect(bx,by,bw,bh,PX*0.8); ctx.stroke();
+    ctx.fillStyle='#5b6472'; ctx.font=(PX*1.7)+'px Menlo, monospace';
+    ctx.textBaseline='middle'; ctx.fillText('› ask pi…', bx+PX*1.2, by+bh/2);
+  }
+  function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+
+  function tick(){var name=Math.random()<0.10?'blink':'idle';drawFrame(cur,name);}
+
+  THEMES.forEach(function(t,i){var b=document.createElement('button');b.textContent=t.name;if(i===0)b.className='on';b.onclick=function(){cur=i;queue=[];[].forEach.call(bar.children,function(x,j){x.className=j===i?'on':'';});cap.textContent=t.blurb;};bar.appendChild(b);});
+  cap.textContent=THEMES[0].blurb;
+  tick(); setInterval(tick,260);
+})();
+</script>

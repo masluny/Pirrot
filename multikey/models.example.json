@@ -1,0 +1,21 @@
+{
+  "providers": {
+    "nvidia-multikey": {
+      "baseUrl": "http://127.0.0.1:8765/v1",
+      "apiKey": "rotator",
+      "api": "openai-completions",
+      "models": [
+        {
+          "id": "minimaxai/minimax-m3",
+          "name": "multikey",
+          "reasoning": true,
+          "contextWindow": 1000000,
+          "maxTokens": 16384,
+          "compat": {
+            "maxTokensField": "max_tokens"
+          }
+        }
+      ]
+    }
+  }
+}
